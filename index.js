@@ -3,40 +3,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const { ApolloServer } = require('apollo-server')
-const gql = require('graphql-tag') // import A JavaScript template literal tag that parses GraphQL query strings into the standard GraphQL AST
 const mongoose = require('mongoose')
 
-const User = require('./models/user')
+const typeDefs = require('./graphql/typeDefs')
+const resolvers = require('./graphql/resolvers/users')
 
-
-// Define schema's types
-const typeDefs = gql `
-  type User {
-    id: ID!,
-    username: String!,
-    name: String!,
-    email: String!
-  }
-
-  type Query {
-    getUsers: [User]
-  }
-`
-
-const resolvers = {
-  Query: {
-    async getUsers(){
-      try {
-        const users = await User.find()
-        return users
-      }
-      catch(err) {
-        throw new Error(err)
-
-      }
-    }
-  }
-}
 
 // setting up Apollo server
 const server = new ApolloServer({
