@@ -6,19 +6,36 @@ const { ApolloServer } = require('apollo-server')
 const gql = require('graphql-tag') // import A JavaScript template literal tag that parses GraphQL query strings into the standard GraphQL AST
 const mongoose = require('mongoose')
 
+const User = require('./models/user')
+
 
 // Define schema's types
-const typeDefs = gql `   
+const typeDefs = gql `
+  type User {
+    id: ID!,
+    username: String!,
+    name: String!,
+    email: String!
+  }
+
   type Query {
-    sayHello: String!
+    getUsers: [User]
   }
 `
 
 const resolvers = {
   Query: {
-    sayHello: () => 'Hello World'
-  }
+    async getUsers(){
+      try {
+        const users = await User.find()
+        return users
+      }
+      catch(err) {
+        throw new Error(err)
 
+      }
+    }
+  }
 }
 
 // setting up Apollo server
