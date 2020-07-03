@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { UserInputError } = require('apollo-server')
 
 const User = require('../../models/user')
 
@@ -25,7 +26,28 @@ module.exports = {
       confirmPassword
     }
   }, 
-  context, info) {
+  ) {
+      // checking if user credentials already exist
+      const userName = await User.findOne({ username })
+      const userEmail = await User.findOne({ email })
+
+      if (userName && userEmail) {
+        throw new UserInputError('This user exists already. Please log in instead', 422)
+      } 
+      else if (userName) {
+        throw new UserInputError('This username exists already', {errors: {
+          username: 'This username is taken'
+          }}
+       )
+      }
+      else if (userEmail) {
+        throw new UserInputError('This email exists already', {
+          errors: {
+            email: 'This email is taken'
+          }
+        })
+      }
+
       // hashing a password
       password = await bcrypt.hash(password, 12)
 
