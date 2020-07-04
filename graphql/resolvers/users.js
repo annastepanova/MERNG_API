@@ -55,24 +55,30 @@ module.exports = {
         }
         
       // checking if user credentials already exist
-      const userName = await User.findOne({ username })
-      const userEmail = await User.findOne({ email })
 
-      if (userName && userEmail) {
-        throw new UserInputError('This user exists already. Please log in instead', 422)
-      } 
-      else if (userName) {
-        throw new UserInputError('This username exists already', {errors: {
-          username: 'This username is taken'
-          }}
-       )
-      }
-      else if (userEmail) {
-        throw new UserInputError('This email exists already', {
-          errors: {
-            email: 'This email is taken'
-          }
-        })
+      const userDB = await User.findOne({
+        $or: [
+          { email: email },
+          { username: username }
+        ]
+      })
+
+      if (userDB) {
+        if (username == userDB.username) {
+          throw new UserInputError('This user exists already. Please log in instead',
+            {
+              errors: {
+                username: 'This username is taken'
+              }
+            }
+          )       
+        } else if (email == userDB.email) {
+          throw new UserInputError('This email exists already', {
+            errors: {
+              email: 'This email is taken'
+            }
+          })        
+        }
       }
 
       // hashing a password
